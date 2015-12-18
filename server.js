@@ -27,22 +27,6 @@ var channels = {},
       serviceKey: '',
       debug: false,
       baseAuthPath: '/nodejs/',
-      publishUrl: 'publish',
-      kickUserUrl: 'user/kick/:uid',
-      logoutUserUrl: 'user/logout/:authtoken',
-      addUserToChannelUrl: 'user/channel/add/:channel/:uid',
-      removeUserFromChannelUrl: 'user/channel/remove/:channel/:uid',
-      addChannelUrl: 'channel/add/:channel',
-      checkChannelUrl: 'channel/check/:channel',
-      healthCheckUrl: 'health/check',
-      removeChannelUrl: 'channel/remove/:channel',
-      setUserPresenceListUrl: 'user/presence-list/:uid/:uidList',
-      addAuthTokenToChannelUrl: 'authtoken/channel/add/:channel/:uid',
-      removeAuthTokenFromChannelUrl: 'authtoken/channel/remove/:channel/:uid',
-      toggleDebugUrl: 'debug/toggle',
-      contentTokenUrl: 'content/token',
-      publishMessageToContentChannelUrl: 'content/token/message',
-      getContentTokenUsersUrl: 'content/token/users',
       extensions: [],
       clientsCanWriteToChannels: false,
       clientsCanWriteToClients: false,
@@ -1113,21 +1097,26 @@ var setupClientConnection = function (sessionId, authData, contentTokens) {
 
 var app = express();
 app.all(settings.baseAuthPath + '*', checkServiceKeyCallback);
-app.post(settings.baseAuthPath + settings.publishUrl, publishMessage);
-app.get(settings.baseAuthPath + settings.kickUserUrl, kickUser);
-app.get(settings.baseAuthPath + settings.logoutUserUrl, logoutUser);
-app.get(settings.baseAuthPath + settings.addUserToChannelUrl, addUserToChannel);
-app.get(settings.baseAuthPath + settings.removeUserFromChannelUrl, removeUserFromChannel);
-app.get(settings.baseAuthPath + settings.addChannelUrl, addChannel);
-app.get(settings.baseAuthPath + settings.healthCheckUrl, healthCheck);
-app.get(settings.baseAuthPath + settings.checkChannelUrl, checkChannel);
-app.get(settings.baseAuthPath + settings.removeChannelUrl, removeChannel);
-app.get(settings.baseAuthPath + settings.setUserPresenceListUrl, setUserPresenceList);
-app.post(settings.baseAuthPath + settings.toggleDebugUrl, toggleDebug);
-app.post(settings.baseAuthPath + settings.getContentTokenUsersUrl, getContentTokenUsers);
-app.post(settings.baseAuthPath + settings.contentTokenUrl, setContentToken);
-app.post(settings.baseAuthPath + settings.publishMessageToContentChannelUrl, publishMessageToContentChannel);
+app.post(settings.baseAuthPath + 'publish', publishMessage);
+app.get(settings.baseAuthPath + 'user/kick/:uid', kickUser);
+app.get(settings.baseAuthPath + 'user/logout/:authtoken', logoutUser);
+app.get(settings.baseAuthPath + 'user/channel/add/:channel/:uid', addUserToChannel);
+app.get(settings.baseAuthPath + 'user/channel/remove/:channel/:uid', removeUserFromChannel);
+app.get(settings.baseAuthPath + 'channel/add/:channel', addChannel);
+app.get(settings.baseAuthPath + 'health/check', healthCheck);
+app.get(settings.baseAuthPath + 'channel/check/:channel', checkChannel);
+app.get(settings.baseAuthPath + 'channel/remove/:channel', removeChannel);
+app.get(settings.baseAuthPath + 'user/presence-list/:uid/:uidList', setUserPresenceList);
+app.post(settings.baseAuthPath + 'debug/toggle', toggleDebug);
+app.post(settings.baseAuthPath + 'content/token/users', getContentTokenUsers);
+app.post(settings.baseAuthPath + 'content/token', setContentToken);
+app.post(settings.baseAuthPath + 'content/token/message', publishMessageToContentChannel);
 app.get('*', send404);
+
+// @TODO: These two paths were defined in the config, but have not been implemented.
+//  addAuthTokenToChannelUrl: 'authtoken/channel/add/:channel/:uid',
+//  removeAuthTokenFromChannelUrl: 'authtoken/channel/remove/:channel/:uid',
+
 
 var server;
 if (settings.scheme == 'https') {

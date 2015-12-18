@@ -38,9 +38,6 @@
  * sslPassPhrase: SSL passphrase, will be passed in the passphrase key to the https
  * server if set.
  *
- * publishUrl: http path on which the node server should accept messages from
- * the Drupal site.
- *
  * backend: An object with the following properties:
  *
  *  -- port: TCP port of the server running the Drupal site. Usually 80.
@@ -90,19 +87,6 @@ settings = {
   sslCertPath: '',
   sslCAPath: '',
   baseAuthPath: '/nodejs/',
-  publishUrl: 'publish',
-  kickUserUrl: 'user/kick/:uid',
-  logoutUserUrl: 'user/logout/:authtoken',
-  addUserToChannelUrl: 'user/channel/add/:channel/:uid',
-  removeUserFromChannelUrl: 'user/channel/remove/:channel/:uid',
-  addChannelUrl: 'channel/add/:channel',
-  removeChannelUrl: 'channel/remove/:channel',
-  setUserPresenceListUrl: 'user/presence-list/:uid/:uidList',
-  addAuthTokenToChannelUrl: 'authtoken/channel/add/:channel/:uid',
-  removeAuthTokenFromChannelUrl: 'authtoken/channel/remove/:channel/:uid',
-  toggleDebugUrl: 'debug/toggle',
-  contentTokenUrl: 'content/token',
-  publishMessageToContentChannelUrl: 'content/token/message',
   extensions: [],
   clientsCanWriteToChannels: false,
   clientsCanWriteToClients: false,
