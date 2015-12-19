@@ -19,94 +19,13 @@ var channels = {},
     presenceTimeoutIds = {},
     contentChannelTimeoutIds = {},
     tokenChannels = {},
-    settingsDefaults = {
-      scheme: 'http',
-      port: 8080,
-      host: 'localhost',
-      resource: '/socket.io',
-      serviceKey: '',
-      debug: false,
-      baseAuthPath: '/nodejs/',
-      extensions: [],
-      clientsCanWriteToChannels: false,
-      clientsCanWriteToClients: false,
-      transports: ['websocket', 'polling'],
-      jsMinification: true,
-      jsEtag: true,
-      backend: {
-        host: 'localhost',
-        scheme: 'http',
-        port: 80,
-        basePath: '/',
-        strictSSL: false,
-        messagePath: 'nodejs/message',
-        httpAuth: ''
-      },
-      logLevel: 1
-    },
     extensions = [];
 
-var configFile = process.cwd() + '/nodejs.config.js';
-if (process.argv[2]) {
-  configFile = process.argv[2];
-}
-try {
-  var settings = vm.runInThisContext(fs.readFileSync(configFile));
-}
-catch (exception) {
-  console.log("Failed to read config file, exiting: " + exception);
-  process.exit(1);
-}
 
-for (var key in settingsDefaults) {
-  if (key != 'backend' && !settings.hasOwnProperty(key)) {
-    settings[key] = settingsDefaults[key];
-  }
-}
 
-if (!settings.hasOwnProperty('backend')) {
-  settings.backend = settingsDefaults.backend;
-}
-else {
-  for (var key2 in settingsDefaults.backend) {
-    if (!settings.backend.hasOwnProperty(key2)) {
-      settings.backend[key2] = settingsDefaults.backend[key2];
-    }
-  }
-}
 
-// Load server extensions
-for (var i in settings.extensions) {
-  try {
-    // Load JS files for extensions as modules, and collect the returned
-    // object for each extension.
-    extensions.push(require(__dirname + '/' + settings.extensions[i]));
-    console.log("Extension loaded: " + settings.extensions[i]);
-  }
-  catch (exception) {
-    console.log("Failed to load extension " + settings.extensions[i] + " [" + exception + "]");
-    process.exit(1);
-  }
-}
 
-/**
- * Invokes the specified function on all registered server extensions.
- */
-var invokeExtensions = function (hook) {
-  var args = arguments.length ? Array.prototype.slice.call(arguments, 1) : [];
-  var returnValues = {};
-  for (var i in extensions) {
-    if (extensions[i].hasOwnProperty(hook) && extensions[i][hook].apply) {
-      returnValues[i] = extensions[i][hook].apply(this, args);
-    }
-  }
-  return returnValues;
-}
 
-/**
- * Allow extensions to alter the settings.
- */
-invokeExtensions('settingsAlter', settings);
 
 /**
  * Check if the given channel is client-writable.
@@ -1083,28 +1002,6 @@ if (settings.scheme == 'https') {
 }
 else {
   server = http.createServer(app);
-}
-
-// Allow extensions to add routes.
-var path = '';
-for (var i in extensions) {
-  if (extensions[i].hasOwnProperty('routes')) {
-    console.log('Adding route handlers from extension', extensions[i].routes);
-    for (var j = 0; j < extensions[i].routes.length; j++) {
-      if (extensions[i].routes[j].auth) {
-        path = settings.baseAuthPath + extensions[i].routes[j].path;
-      }
-      else {
-        path = extensions[i].routes[j].path;
-      }
-      if (extensions[i].routes[j].type == 'post') {
-        server.post(path, extensions[i].routes[j].handler);
-      }
-      else {
-        server.get(path, extensions[i].routes[j].handler);
-      }
-    }
-  }
 }
 
 server.listen(settings.port, settings.host);
