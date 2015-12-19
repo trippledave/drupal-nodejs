@@ -128,53 +128,12 @@ var clientIsInChannel = function (socket, channel) {
   return channels[channel].sessionIds[socket.id];
 }
 
-/**
- * Returns the backend url.
- */
-var getBackendUrl = function () {
-  return settings.backend.scheme + '://' + settings.backend.host + ':' +
-         settings.backend.port + settings.backend.basePath + settings.backend.messagePath;
-}
 
-var getAuthHeader = function() {
-  if (settings.backend.httpAuth.length > 0) {
-    return 'Basic ' + new Buffer(settings.backend.httpAuth).toString('base64');
-  }
-  return false;
-}
 
-/**
- * Send a message to the backend.
- */
-var sendMessageToBackend = function (message, callback) {
-  var requestBody = querystring.stringify({
-    messageJson: JSON.stringify(message),
-    serviceKey: settings.serviceKey
-  });
 
-  var options = {
-    uri: getBackendUrl(),
-    body: requestBody,
-    headers: {
-      'Content-Length': Buffer.byteLength(requestBody),
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
-  }
 
-  if (settings.backend.scheme == 'https') {
-     options.strictSSL = settings.backend.strictSSL;
-  }
 
-  var httpAuthHeader = getAuthHeader();
-  if (httpAuthHeader !== false) {
-    options.headers.Authorization = httpAuthHeader;
-  }
 
-  if (settings.debug) {
-    console.log("Sending message to backend", message, options);
-  }
-  request.post(options, callback);
-}
 
 /**
  * Authenticate a client connection based on the message it sent.
@@ -272,16 +231,6 @@ var checkServiceKeyCallback = function (request, response, next) {
   }
 }
 
-/**
- * Check a service key against the configured service key.
- */
-var checkServiceKey = function (serviceKey) {
-  if (settings.serviceKey && serviceKey != settings.serviceKey) {
-    console.log('Invalid service key "' + serviceKey + '", expecting "' + settings.serviceKey + '"');
-    return false;
-  }
-  return true;
-}
 
 /**
  * Http callback - return the list of content channel users.
