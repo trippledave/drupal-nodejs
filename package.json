@@ -1,14 +1,14 @@
 {
   "name": "drupal-node.js",
   "description": "Push notifications from Drupal.",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "homepage": "https://drupal.org/project/nodejs",
   "engines": {
     "node": "4.2.x"
   },
   "dependencies": {
     "express": "4.x",
-    "request": "2.36",
+    "request": "2.67.x",
     "socket.io": "1.x"
   }
 }
