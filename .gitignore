@@ -20,3 +20,8 @@ node_modules
 
 # App specific
 nodejs.config.js
+
+# Development
+# beejeebus' vim ctags file
+tags
+
