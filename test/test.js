@@ -1,10 +1,14 @@
 var assert = require('assert');
 var url = require('url');
 var request = require('request');
+var io = require('socket.io-client');
 var configManager = require('../lib/config-manager');
 var settings = configManager.getSettings();
 
 describe('Server app', function () {
+  this.timeout(5000);
+
+  var client;
 
   var serverUrl = url.format({
     protocol: settings.scheme,
@@ -70,4 +74,59 @@ describe('Server app', function () {
       done();
     });
   });
+
+  it('should create channel', function(done) {
+    requestOptions.url = serverUrl + 'channel/add/test_channel_2';
+
+    request.post(requestOptions, function(error, response, body) {
+      assert.equal(body.status, 'success');
+      done();
+    });
+  });
+
+  it('should persist channel', function(done) {
+    requestOptions.url = serverUrl + 'channel/check/test_channel_2';
+
+    request.get(requestOptions, function(error, response, body) {
+      assert.equal(body.status, 'success');
+      done();
+    });
+  });
+
+  it('should accept client connections', function(done) {
+    client = io(settings.scheme + '://' + settings.host + ':' + settings.port);
+
+    client.on('connect', function() {
+      done();
+    });
+
+    client.on('connect_error', function() {
+      assert.fail(true, false, 'Connection error');
+      done();
+    });
+
+    client.on('connect_timeout', function() {
+      assert.fail(true, false, 'Connection timeout');
+      done();
+    });
+  });
+
+  it('should broadcast messages', function(done) {
+    requestOptions.url = serverUrl + 'publish';
+    requestOptions.body = {
+      channel: 'test_channel',
+      text: 'test_message',
+      broadcast: 1
+    };
+
+    client.on('message', function(message) {
+      assert.equal(message.text, 'test_message');
+      done();
+    });
+
+    request.post(requestOptions, function(error, response, body) {
+      assert.equal(body.status, 'success');
+    });
+  });
+
 });

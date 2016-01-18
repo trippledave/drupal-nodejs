@@ -9,8 +9,11 @@
   "dependencies": {
     "express": "4.x",
     "request": "2.67.x",
-    "mocha": "2.3.x",
     "body-parser": "1.14.2",
     "socket.io": "1.x"
+  },
+  "devDependencies": {
+    "mocha": "2.3.x",
+    "socket.io-client": "1.x"
   }
 }
