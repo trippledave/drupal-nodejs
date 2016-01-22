@@ -5,5 +5,8 @@
 'use strict';
 
 var server = require('./lib/server');
+var configManager = require('./lib/config-manager');
+var configFile = process.argv[2] ? process.argv[2] : process.cwd() + '/nodejs.config.js';
 
-server.start(require('./lib/config-manager'));
+configManager.readFromDisk(configFile);
+server.start(configManager);
