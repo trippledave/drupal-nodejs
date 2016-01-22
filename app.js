@@ -6,4 +6,4 @@
 
 var server = require('./lib/server');
 
-server.start();
+server.start(require('./lib/config-manager'));
