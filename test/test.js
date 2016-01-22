@@ -9,17 +9,37 @@ describe('Server app', function () {
   this.timeout(5000);
 
   var client;
-  var settings = configManager.getSettings();
+  var settings = {
+    scheme: 'http',
+    port: 8080,
+    host: 'localhost',
+    resource: '/socket.io',
+    serviceKey: '__LOL_TESTING__',
+    debug: false,
+    baseAuthPath: '/nodejs/',
+    extensions: [],
+    clientsCanWriteToChannels: false,
+    clientsCanWriteToClients: false,
+    transports: ['websocket', 'polling'],
+    jsMinification: true,
+    jsEtag: true,
+    backend: {
+      host: 'localhost',
+      scheme: 'http',
+      port: 80,
+      basePath: '/',
+      strictSSL: false,
+      messagePath: 'nodejs/message',
+      httpAuth: ''
+    },
+    logLevel: 1
+  };
 
   var serverUrl = url.format({
     protocol: settings.scheme,
     hostname: settings.host,
     port: settings.port,
     pathname: settings.baseAuthPath
-  });
-
-  before(function () {
-    server.start(configManager);
   });
 
   var requestOptions = {
@@ -29,6 +49,11 @@ describe('Server app', function () {
       'NodejsServiceKey': settings.serviceKey
     }
   };
+
+  before(function () {
+    configManager.setSettings(settings);
+    server.start(configManager);
+  });
 
   it('should respond to requests', function(done) {
     request.get(serverUrl, function(error, response, body) {
