@@ -11,6 +11,9 @@
   "engines": {
     "node": "4.2.x"
   },
+  "scripts": {
+    "test": "node_modules/.bin/mocha"
+  },
   "dependencies": {
     "express": "4.x",
     "request": "2.67.x",
