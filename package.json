@@ -2,7 +2,12 @@
   "name": "drupal-node.js",
   "description": "Push notifications from Drupal.",
   "version": "1.0.6",
-  "homepage": "https://drupal.org/project/nodejs",
+  "homepage": "https://github.com/beejeebus/drupal-nodejs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beejeebus/drupal-nodejs.git"
+  },
+  "license": "GPL-2.0",
   "engines": {
     "node": "4.2.x"
   },
