@@ -3,18 +3,23 @@ var url = require('url');
 var request = require('request');
 var io = require('socket.io-client');
 var configManager = require('../lib/config-manager');
-var settings = configManager.getSettings();
+var server = require('../lib/server');
 
 describe('Server app', function () {
   this.timeout(5000);
 
   var client;
+  var settings = configManager.getSettings();
 
   var serverUrl = url.format({
     protocol: settings.scheme,
     hostname: settings.host,
     port: settings.port,
     pathname: settings.baseAuthPath
+  });
+
+  before(function () {
+    server.start(configManager);
   });
 
   var requestOptions = {
