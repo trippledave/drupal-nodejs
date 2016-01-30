@@ -37,6 +37,8 @@ describe('Server app', function () {
     },
     test: {
       authToken: 'lol_test_auth_token',
+      uid: 666,
+      clientId: 'lotestclientid'
     },
     logLevel: 1
   };
@@ -67,8 +69,11 @@ describe('Server app', function () {
     return true;
   };
 
-  var authSuccessResult = {
-    'nodejsValidAuthToken': true
+  var authResult = {
+    nodejsValidAuthToken: true,
+    clientId: settings.test.clientId,
+    channels: [],
+    uid: settings.test.uid
   };
 
   var authSuccessCheck = function (response) {
@@ -149,21 +154,11 @@ describe('Server app', function () {
     });
   });
 
-  it('should accept client connections', function(done) {
-    client = io(settings.scheme + '://' + settings.host + ':' + settings.port);
-    client.on('connect', function() {
-      var scope = nock(backendHost).post(backendMessagePath, bodyMatch).reply(200, authSuccessResult);
-      client.emit('authenticate', {authToken: settings.test.authToken}, function (response) {
-        assert.equal(response.result, 'success');
-        done();
-      });
-    });
-  });
-
   it('should allow client connections with valid tokens', function(done) {
     client = io.connect(settings.scheme + '://' + settings.host + ':' + settings.port);
     client.on('connect', function() {
-      var scope = nock(backendHost).post(backendMessagePath, bodyMatch).reply(200, authSuccessResult);
+      authResult.clientId = client.nsp + '#' + client.id;
+      nock(backendHost).post(backendMessagePath, bodyMatch).reply(200, authResult);
       client.emit('authenticate', {authToken: settings.test.authToken}, function (response) {
         assert.equal(response.result, 'success');
         done();
@@ -174,7 +169,9 @@ describe('Server app', function () {
   it('should disconnect client connections with invalid tokens', function(done) {
     client = io.connect(settings.scheme + '://' + settings.host + ':' + settings.port);
     client.on('connect', function() {
-      var scope = nock(backendHost).post(backendMessagePath, bodyMatch).reply(200, {});
+      authResult.clientId = client.nsp + '#' + client.id;
+      authResult.nodejsValidAuthToken = false;
+      nock(backendHost).post(backendMessagePath, bodyMatch).reply(200, authResult);
       client.emit('authenticate', {authToken: '__bad_auth_token__'});
     });
     client.on('disconnect', function() {
