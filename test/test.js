@@ -1,4 +1,6 @@
 var assert = require('assert');
+var querystring = require('querystring');
+var nock = require('nock');
 var url = require('url');
 var request = require('request');
 var io = require('socket.io-client');
@@ -6,9 +8,10 @@ var configManager = require('../lib/config-manager');
 var server = require('../lib/server');
 
 describe('Server app', function () {
-  this.timeout(5000);
+  this.timeout(1000);
 
   var client;
+
   var settings = {
     scheme: 'http',
     port: 8080,
@@ -26,11 +29,14 @@ describe('Server app', function () {
     backend: {
       host: 'localhost',
       scheme: 'http',
-      port: 80,
+      port: 8000,
       basePath: '/',
       strictSSL: false,
       messagePath: 'nodejs/message',
       httpAuth: ''
+    },
+    test: {
+      authToken: 'lol_test_auth_token',
     },
     logLevel: 1
   };
@@ -42,12 +48,32 @@ describe('Server app', function () {
     pathname: settings.baseAuthPath
   });
 
+  var backendHost = url.format({
+    protocol: settings.backend.scheme,
+    hostname: settings.backend.host,
+    port: settings.backend.port
+  });
+  var backendMessagePath = settings.backend.basePath + settings.backend.messagePath;
+
   var requestOptions = {
     url: serverUrl,
     json: true,
     headers: {
       'NodejsServiceKey': settings.serviceKey
     }
+  };
+
+  var bodyMatch = function (body) {
+    return true;
+  };
+
+  var authSuccessResult = {
+    'nodejsValidAuthToken': true
+  };
+
+  var authSuccessCheck = function (response) {
+    assert.equal(response.result, 'success');
+    done();
   };
 
   before(function () {
@@ -125,37 +151,34 @@ describe('Server app', function () {
 
   it('should accept client connections', function(done) {
     client = io(settings.scheme + '://' + settings.host + ':' + settings.port);
-
     client.on('connect', function() {
-      done();
-    });
-
-    client.on('connect_error', function() {
-      assert.fail(true, false, 'Connection error');
-      done();
-    });
-
-    client.on('connect_timeout', function() {
-      assert.fail(true, false, 'Connection timeout');
-      done();
+      var scope = nock(backendHost).post(backendMessagePath, bodyMatch).reply(200, authSuccessResult);
+      client.emit('authenticate', {authToken: settings.test.authToken}, function (response) {
+        assert.equal(response.result, 'success');
+        done();
+      });
     });
   });
 
-  it('should broadcast messages', function(done) {
-    requestOptions.url = serverUrl + 'publish';
-    requestOptions.body = {
-      channel: 'test_channel',
-      text: 'test_message',
-      broadcast: 1
-    };
-
-    client.on('message', function(message) {
-      assert.equal(message.text, 'test_message');
-      done();
+  it('should allow client connections with valid tokens', function(done) {
+    client = io.connect(settings.scheme + '://' + settings.host + ':' + settings.port);
+    client.on('connect', function() {
+      var scope = nock(backendHost).post(backendMessagePath, bodyMatch).reply(200, authSuccessResult);
+      client.emit('authenticate', {authToken: settings.test.authToken}, function (response) {
+        assert.equal(response.result, 'success');
+        done();
+      });
     });
+  });
 
-    request.post(requestOptions, function(error, response, body) {
-      assert.equal(body.status, 'success');
+  it('should disconnect client connections with invalid tokens', function(done) {
+    client = io.connect(settings.scheme + '://' + settings.host + ':' + settings.port);
+    client.on('connect', function() {
+      var scope = nock(backendHost).post(backendMessagePath, bodyMatch).reply(200, {});
+      client.emit('authenticate', {authToken: '__bad_auth_token__'});
+    });
+    client.on('disconnect', function() {
+      done();
     });
   });
 
