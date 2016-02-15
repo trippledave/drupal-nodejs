@@ -1,7 +1,7 @@
 {
   "name": "drupal-node.js",
   "description": "Push notifications from Drupal.",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "homepage": "https://github.com/beejeebus/drupal-nodejs",
   "repository": {
     "type": "git",
