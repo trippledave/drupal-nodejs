@@ -53,6 +53,47 @@ exampleExtension.alterSettings = function (settings) {
  * clientManager, and to initialize your extension.
  */
 exampleExtension.setup = function (clientManager) {
+
+  /**
+   * The client-connection event is emitted when a new client connects.
+   * The client is not authenticated yet, so it does not receive messages.
+   */
+  process.on('client-connection', function (sessionId) {
+    console.log('Example extension got connection event for session ' + sessionId);
+  });
+
+  /**
+   * The client-authenticated event is emitted after the client has been
+   * authenticated.
+   */
+  process.on('client-authenticated', function (sessionId, authData) {
+    console.log('Example extension got authenticated event for session ' + sessionId + ' (user ' + authData.uid + ')');
+    clientManager.publishMessageToClient(sessionId, {data: {subject: 'Example extension', body: 'Welcome, you are authenticated.'}});
+  });
+
+  /**
+   * The client-to-client-message event is emitted when a client sends a message
+   * to another connected client.
+   */
+  process.on('client-to-client-message', function (sessionId, message) {
+    console.log('Example extension got message event for session ' + sessionId);
+  });
+
+  /**
+   * The client-to-channel-message event is emitted when a client sends a
+   * message to a channel.
+   */
+  process.on('client-to-channel-message', function (sessionId, message) {
+    console.log('Example extension got channel message event for session ' + sessionId);
+  });
+
+  /**
+   * The client-disconnect event is emitted when a client disconnects.
+   */
+  process.on('client-disconnect', function (sessionId) {
+    console.log('Example extension got disconnect event for session ' + sessionId);
+  });
+
 };
 
 module.exports = exampleExtension;
