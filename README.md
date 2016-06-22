@@ -5,14 +5,15 @@ https://www.drupal.org/project/nodejs
 
 ## Prerequisites
 
-* [Node.js](https://nodejs.org)
+* [Node.js](https://nodejs.org) version 4
 * [Forever](https://github.com/foreverjs/forever) (optional)
 
 ## Installation
 
 Use one of the following two methods to download the app:
 
-* Install using NPM by running `npm install drupal-node.js`
+* Install using NPM by running `npm install drupal-node.js`. Note that the
+app will be installed in the node_modules subdirectory
 
 * Download the
 [latest release](https://github.com/beejeebus/drupal-nodejs/releases) from
